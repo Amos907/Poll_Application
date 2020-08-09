@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-5 text-center">{{ question.question_text }}</h1>
+
+<ul class="list-group mb-5">
+	{% for choice in question.choice_set.all %}
+	<li class="list-group-item">
+		{{ choice.choice_text }}  <span class="badge badge-success float-right">{{ choice.votes }} vote{{ choice.votes | pluralize }}</span>
+	</li>
+	{% endfor %}
+</ul>
+
+<a class="btn btn-secondary" href="{% url 'polls:index' %}">Back To Polls</a>
+<a class="btn btn-dark" href="{% url 'polls:detail' question.id %}">Vote again?</a>
+
+<div id="myChart"></div>
+
+<script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+<script >
+	var question_id = '{{question.id}}'
+	var state = {
+		'items':[],
+		'values':[],
+	}
+	var url = `/polls/resultdata/${question_id}`
+
+	// var request = new XMLHttpRequest();
+
+ //    request.open('GET',url,true);
+
+ //    request.onload = function(){
+ //            if (this.status == 200) {
+ //                // console.log(this.responseText);
+ //                var data = JSON.parse(this.responseText);
+
+ //                 for(var i in data){
+	// 			  	var key = Object.keys(data[i])[0]
+	// 			 	var value = Object.values(data[i])[0]
+
+	// 			 	state.items.push(key)
+	// 			 	state.values.push(value)
+
+	// 			 	console.log('STATE:',state)
+
+	// 			 build_chart();
+	// 			}
+	// 		}
+	// 	}
+
+	// 	request.onerror = function(){
+ //            console.log("request error...")
+ //        }
+
+	// 	request.send();
+
+
+
+	fetch(url)
+	.then((response) => response.json())
+	.then((data) =>{
+		  for(var i in data){
+		  	var key = Object.keys(data[i])[0]
+		 	var value = Object.values(data[i])[0]
+
+		 	state.items.push(key)
+		 	state.values.push(value)
+
+		 	console.log('STATE':state)
+
+		 	build_chart();
+
+		  }
+	})
+
+	function build_chart(){
+
+		var chart_data={
+		"type":"bar",
+		"scale-x":{
+			"values":state.items
+			},
+		series:[
+			{
+				"values":state.values
+			}
+		]
+
+	}
+
+	zingchart.render({
+		id:'myChart',
+		data:chart_data,
+	});
+	}
+
+</script>
+
+{% endblock %}
